@@ -1,0 +1,26 @@
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.ds_store
+
+# Python / Backend
+__pycache__/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/services/__pycache__/
+backend/app/routers/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+env/
+*.db
+*.sqlite3
+
+# Environment & IDE
+.env
+.vscode/
+.idea/
