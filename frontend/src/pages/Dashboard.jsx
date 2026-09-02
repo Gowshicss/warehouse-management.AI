@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import OutOfStockAlert from '../components/Common/OutOfStockAlert';
 import {
   Boxes,
   Users,
@@ -20,17 +21,12 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user, isOwner } = useAuth();
+  const { user, isOwner, isManager } = useAuth();
   const navigate = useNavigate();
 
   const [summary, setSummary] = useState(null);
   const [priorities, setPriorities] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Hover states for buttons
-  const [newOrderHover, setNewOrderHover] = useState(false);
-  const [logWorkHover, setLogWorkHover] = useState(false);
-  const [refreshHover, setRefreshHover] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -119,262 +115,64 @@ const Dashboard = () => {
   // Overview stats cards definition
   const statsCards = summary ? [
     {
+      label: 'OUT OF STOCK',
+      value: summary.inventory.out_of_stock?.toString() ?? (summary.inventory.critical?.toString() || '0'),
+      isWarn: (summary.inventory.out_of_stock ?? 0) > 0
+    },
+    {
       label: 'TOTAL PRODUCTS',
       value: summary.inventory.total_items?.toLocaleString() || '0',
-      color: '#2563eb',
       isWarn: false
     },
     {
       label: 'LOW STOCK',
       value: summary.inventory.low_stock?.toString() || '0',
-      color: '#dc2626',
       isWarn: summary.inventory.low_stock > 0
     },
     {
       label: 'WAREHOUSES',
       value: '4',
-      color: '#2563eb',
       isWarn: false
     },
     {
       label: 'VEHICLES',
       value: summary.vehicles.total?.toString() || '0',
-      color: '#2563eb',
       isWarn: false
     },
     {
       label: 'WORKERS PRESENT',
       value: `${summary.attendance.present} / ${summary.attendance.total_workers}`,
-      color: '#2563eb',
       isWarn: false
     },
     {
       label: 'PENDING RECEIVING',
       value: summary.receiving?.pending_review?.toString() || '0',
-      color: '#d97706',
       isWarn: summary.receiving?.pending_review > 0
     }
   ] : [];
 
-  // Scoped layout styles to ensure a clean, professional, human-designed look
-  const styles = {
-    container: {
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      color: '#1e293b',
-      background: '#f8fafc',
-      minHeight: '100%',
-      padding: '2px 0 24px 0'
-    },
-    headerRow: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px'
-    },
-    title: {
-      fontSize: '22px',
-      fontWeight: '700',
-      color: '#0f172a',
-      margin: 0
-    },
-    subtitle: {
-      fontSize: '12px',
-      color: '#64748b',
-      margin: '2px 0 0 0'
-    },
-    refreshBtn: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '6px 12px',
-      background: refreshHover ? '#f1f5f9' : '#ffffff',
-      border: '1px solid #cbd5e1',
-      borderRadius: '4px',
-      fontSize: '11px',
-      fontWeight: '600',
-      color: '#475569',
-      cursor: 'pointer',
-      transition: 'background 0.15s ease'
-    },
-    dashboardGrid: {
-      display: 'flex',
-      gap: '16px',
-      marginBottom: '24px',
-      alignItems: 'stretch'
-    },
-    attentionCard: {
-      flex: 3,
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '4px',
-      padding: '16px'
-    },
-    cardTitle: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#475569',
-      letterSpacing: '0.5px',
-      textTransform: 'uppercase',
-      margin: '0 0 16px 0',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6px'
-    },
-    attentionGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gap: '16px'
-    },
-    severityCol: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px'
-    },
-    severityHeader: (color) => ({
-      fontSize: '11px',
-      fontWeight: '700',
-      color: color,
-      textTransform: 'uppercase',
-      borderBottom: `2px solid ${color}`,
-      paddingBottom: '4px',
-      marginBottom: '6px'
-    }),
-    bulletList: {
-      listStyleType: 'none',
-      padding: 0,
-      margin: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '6px'
-    },
-    bulletItem: {
-      fontSize: '11px',
-      color: '#334155',
-      lineHeight: '1.4',
-      position: 'relative',
-      paddingLeft: '12px'
-    },
-    bulletDot: (color) => ({
-      position: 'absolute',
-      left: 0,
-      top: '5px',
-      width: '4px',
-      height: '4px',
-      borderRadius: '50%',
-      backgroundColor: color
-    }),
-    quickActionsCard: {
-      width: '240px',
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '4px',
-      padding: '16px',
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    actionBtn: (isPrimary, isHovered) => ({
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '6px',
-      width: '100%',
-      padding: '8px 14px',
-      background: isPrimary ? (isHovered ? '#1d4ed8' : '#2563eb') : (isHovered ? '#f1f5f9' : '#ffffff'),
-      color: isPrimary ? '#ffffff' : '#334155',
-      border: isPrimary ? 'none' : '1px solid #cbd5e1',
-      borderRadius: '4px',
-      fontSize: '11px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      marginBottom: '8px',
-      transition: 'background 0.15s ease'
-    }),
-    sectionHeader: {
-      fontSize: '13px',
-      fontWeight: '700',
-      color: '#334155',
-      letterSpacing: '0.5px',
-      textTransform: 'uppercase',
-      marginBottom: '12px'
-    },
-    overviewGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(6, 1fr)',
-      gap: '12px',
-      marginBottom: '24px'
-    },
-    statCard: {
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '4px',
-      padding: '12px 14px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '6px'
-    },
-    statLabel: {
-      fontSize: '9px',
-      fontWeight: '700',
-      color: '#64748b',
-      letterSpacing: '0.5px'
-    },
-    statVal: (isWarn, color) => ({
-      fontSize: '20px',
-      fontWeight: '700',
-      color: isWarn ? '#dc2626' : '#0f172a'
-    }),
-    ownerCard: {
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '4px',
-      padding: '16px'
-    },
-    ownerHeader: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottom: '1px solid #f1f5f9',
-      paddingBottom: '8px',
-      marginBottom: '12px'
-    },
-    ownerGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '24px'
-    },
-    ownerLabel: {
-      fontSize: '10px',
-      fontWeight: '700',
-      color: '#64748b',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px'
-    },
-    ownerVal: (color) => ({
-      fontSize: '18px',
-      fontWeight: '700',
-      color: color || '#0f172a',
-      margin: '4px 0 2px 0'
-    }),
-    ownerDesc: {
-      fontSize: '10px',
-      color: '#94a3b8',
-      margin: 0
-    }
-  };
+  // Severity column configs (replaces repeated JSX blocks)
+  const severityConfigs = [
+    { label: 'Urgent',       color: '#dc2626', items: urgentItems },
+    { label: 'High Priority', color: '#ea580c', items: highPriorityItems },
+    { label: 'Attention',    color: '#d97706', items: attentionItems },
+    { label: 'Healthy',      color: '#16a34a', items: healthyItems },
+  ];
 
   return (
-    <div style={styles.container}>
+    <div className="font-sans text-slate-800 bg-slate-50 min-h-full pb-6">
+      {/* Out-of-Stock Alert Banner — shown to Owner and Manager */}
+      {(isOwner || isManager) && <OutOfStockAlert />}
+
       {/* Page Title & Controls */}
-      <div style={styles.headerRow}>
+      <div className="flex justify-between items-center mb-5">
         <div>
-          <h1 style={styles.title}>Good Morning, {firstName}</h1>
-          <p style={styles.subtitle}>Here's what requires your attention today.</p>
+          <h1 className="text-[22px] font-bold text-slate-900 m-0">Good Morning, {firstName}</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Here's what requires your attention today.</p>
         </div>
         <button
           onClick={fetchData}
-          style={styles.refreshBtn}
-          onMouseEnter={() => setRefreshHover(true)}
-          onMouseLeave={() => setRefreshHover(false)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded text-[11px] font-semibold text-slate-600 cursor-pointer transition-colors"
         >
           <RefreshCw style={{ width: 12, height: 12, animation: loading ? 'spin 1.5s linear infinite' : 'none' }} />
           <span>Refresh telemetry</span>
@@ -382,86 +180,57 @@ const Dashboard = () => {
       </div>
 
       {/* Main Operations Block */}
-      <div style={styles.dashboardGrid}>
+      <div className="flex gap-4 mb-6 items-stretch">
         {/* Left Column: What Should I Do Today? */}
-        <div style={styles.attentionCard}>
-          <h2 style={styles.cardTitle}>
+        <div className="flex-1 bg-white border border-slate-200 rounded p-4" style={{ flex: 3 }}>
+          <h2 className="text-xs font-bold text-slate-600 tracking-wide uppercase mb-4 flex items-center gap-1.5 m-0">
             <ClipboardList style={{ width: 14, height: 14, color: '#2563eb' }} />
             <span>Operational Priority Checklist</span>
           </h2>
-          <div style={styles.attentionGrid}>
-            {/* Category: URGENT */}
-            <div style={styles.severityCol}>
-              <div style={styles.severityHeader('#dc2626')}>Urgent</div>
-              <ul style={styles.bulletList}>
-                {urgentItems.map((item, idx) => (
-                  <li key={idx} style={styles.bulletItem}>
-                    <span style={styles.bulletDot('#dc2626')} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Category: HIGH PRIORITY */}
-            <div style={styles.severityCol}>
-              <div style={styles.severityHeader('#ea580c')}>High Priority</div>
-              <ul style={styles.bulletList}>
-                {highPriorityItems.map((item, idx) => (
-                  <li key={idx} style={styles.bulletItem}>
-                    <span style={styles.bulletDot('#ea580c')} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Category: ATTENTION */}
-            <div style={styles.severityCol}>
-              <div style={styles.severityHeader('#d97706')}>Attention</div>
-              <ul style={styles.bulletList}>
-                {attentionItems.map((item, idx) => (
-                  <li key={idx} style={styles.bulletItem}>
-                    <span style={styles.bulletDot('#d97706')} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Category: HEALTHY */}
-            <div style={styles.severityCol}>
-              <div style={styles.severityHeader('#16a34a')}>Healthy</div>
-              <ul style={styles.bulletList}>
-                {healthyItems.map((item, idx) => (
-                  <li key={idx} style={styles.bulletItem}>
-                    <span style={styles.bulletDot('#16a34a')} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="grid grid-cols-4 gap-4">
+            {severityConfigs.map(({ label, color, items }) => (
+              <div key={label} className="flex flex-col gap-2">
+                {/* Category Header */}
+                <div style={{
+                  fontSize: '11px', fontWeight: 700, color,
+                  textTransform: 'uppercase', borderBottom: `2px solid ${color}`,
+                  paddingBottom: '4px', marginBottom: '6px'
+                }}>
+                  {label}
+                </div>
+                <ul className="list-none p-0 m-0 flex flex-col gap-1.5">
+                  {items.map((item, idx) => (
+                    <li key={idx} className="text-[11px] text-slate-700 leading-snug relative pl-3">
+                      <span style={{
+                        position: 'absolute', left: 0, top: '5px',
+                        width: '4px', height: '4px', borderRadius: '50%',
+                        backgroundColor: color
+                      }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Right Column: Quick Actions */}
-        <div style={styles.quickActionsCard}>
-          <h2 style={styles.cardTitle}>Quick Actions</h2>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="w-60 bg-white border border-slate-200 rounded p-4 flex flex-col">
+          <h2 className="text-xs font-bold text-slate-600 tracking-wide uppercase mb-4 flex items-center gap-1.5 m-0">
+            Quick Actions
+          </h2>
+          <div className="flex-1 flex flex-col justify-center">
             <button
               onClick={() => navigate('/receiving')}
-              style={styles.actionBtn(true, newOrderHover)}
-              onMouseEnter={() => setNewOrderHover(true)}
-              onMouseLeave={() => setNewOrderHover(false)}
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-semibold mb-2 transition-colors border-none cursor-pointer"
             >
               <Plus style={{ width: 13, height: 13 }} />
               <span>New Order</span>
             </button>
             <button
               onClick={() => navigate('/vehicles')}
-              style={styles.actionBtn(false, logWorkHover)}
-              onMouseEnter={() => setLogWorkHover(true)}
-              onMouseLeave={() => setLogWorkHover(false)}
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded text-[11px] font-semibold mb-2 transition-colors cursor-pointer"
             >
               <Wrench style={{ width: 13, height: 13 }} />
               <span>Log Work</span>
@@ -472,12 +241,14 @@ const Dashboard = () => {
 
       {/* System Overview section */}
       <div>
-        <h2 style={styles.sectionHeader}>System Overview</h2>
-        <div style={styles.overviewGrid}>
+        <h2 className="text-[13px] font-bold text-slate-700 uppercase tracking-wide mb-3">System Overview</h2>
+        <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
           {statsCards.map((stat, idx) => (
-            <div key={idx} style={styles.statCard}>
-              <span style={styles.statLabel}>{stat.label}</span>
-              <span style={styles.statVal(stat.isWarn, stat.color)}>{stat.value}</span>
+            <div key={idx} className="bg-white border border-slate-200 rounded px-3.5 py-3 flex flex-col gap-1.5">
+              <span className="text-[9px] font-bold text-slate-500 tracking-wide">{stat.label}</span>
+              <span className={`text-[20px] font-bold ${stat.isWarn ? 'text-red-600' : 'text-slate-900'}`}>
+                {stat.value}
+              </span>
             </div>
           ))}
         </div>
@@ -485,42 +256,33 @@ const Dashboard = () => {
 
       {/* OWNER-ONLY Financial & Energy Panel */}
       {isOwner && summary?.energy && summary?.financials && (
-        <div style={styles.ownerCard}>
-          <div style={styles.ownerHeader}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="bg-white border border-slate-200 rounded p-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+            <div className="flex items-center gap-1.5">
               <Zap style={{ width: 14, height: 14, color: '#d97706' }} />
-              <span style={{ fontSize: '11px', fontWeight: '700', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">
                 Owner Executive Panel
               </span>
             </div>
-            <span style={{
-              background: '#fef3c7',
-              color: '#d97706',
-              fontSize: '9px',
-              fontWeight: '700',
-              padding: '2px 6px',
-              borderRadius: '2px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
+            <span className="bg-amber-100 text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">
               Restricted
             </span>
           </div>
-          <div style={styles.ownerGrid}>
+          <div className="grid grid-cols-3 gap-6">
             <div>
-              <div style={styles.ownerLabel}>Current Power Load</div>
-              <div style={styles.ownerVal('#d97706')}>{summary.energy.current_power_kw} kW</div>
-              <p style={styles.ownerDesc}>Daily consumption: {summary.energy.today_consumption_kwh} kWh</p>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Current Power Load</div>
+              <div className="text-[18px] font-bold text-amber-600 my-1">{summary.energy.current_power_kw} kW</div>
+              <p className="text-[10px] text-slate-400 m-0">Daily consumption: {summary.energy.today_consumption_kwh} kWh</p>
             </div>
             <div>
-              <div style={styles.ownerLabel}>Projected Utility Cost</div>
-              <div style={styles.ownerVal('#16a34a')}>{formatINR(projectedUtilityCost)} / mo</div>
-              <p style={styles.ownerDesc}>Based on {formatINR(ELECTRICITY_RATE_PER_KWH)}/kWh estimate</p>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Projected Utility Cost</div>
+              <div className="text-[18px] font-bold text-green-600 my-1">{formatINR(projectedUtilityCost)} / mo</div>
+              <p className="text-[10px] text-slate-400 m-0">Based on {formatINR(ELECTRICITY_RATE_PER_KWH)}/kWh estimate</p>
             </div>
             <div>
-              <div style={styles.ownerLabel}>Total Inventory Assets</div>
-              <div style={styles.ownerVal('#2563eb')}>{formatINR(summary.financials.total_inventory_value)}</div>
-              <p style={styles.ownerDesc}>Monthly Expenses: {formatINR(summary.financials.monthly_expenses)}</p>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Total Inventory Assets</div>
+              <div className="text-[18px] font-bold text-blue-600 my-1">{formatINR(summary.financials.total_inventory_value)}</div>
+              <p className="text-[10px] text-slate-400 m-0">Monthly Expenses: {formatINR(summary.financials.monthly_expenses)}</p>
             </div>
           </div>
         </div>

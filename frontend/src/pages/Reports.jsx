@@ -122,7 +122,7 @@ const Reports = () => {
   // Energy & Utility Calculations
   const ELECTRICITY_RATE_PER_KWH = 8.00;
   const dailyKwh = summaryData?.energy?.today_consumption_kwh || 510.0;
-  
+
   let projectedUtilityCost = 0;
   let energyConsumedKwh = 0;
   let periodLabel = "";
@@ -320,282 +320,124 @@ const Reports = () => {
     saveAs(new Blob([wbout], { type: "application/octet-stream" }), fileName);
   };
 
-  const styles = {
-    container: {
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      color: '#1e293b',
-      background: '#f8fafc',
-      minHeight: '100%',
-      paddingBottom: '40px'
-    },
-    topHeader: {
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '16px',
-      marginBottom: '20px',
-      flexWrap: 'wrap'
-    },
-    title: {
-      fontSize: '22px',
-      fontWeight: '700',
-      color: '#0f172a',
-      margin: 0
-    },
-    subtitle: {
-      fontSize: '12px',
-      color: '#64748b',
-      margin: '2px 0 0 0'
-    },
-    periodSelectorGroup: {
-      display: 'inline-flex',
-      background: '#ffffff',
-      border: '1px solid #cbd5e1',
-      borderRadius: '6px',
-      padding: '3px',
-      gap: '2px'
-    },
-    periodBtn: (isActive) => ({
-      padding: '6px 14px',
-      borderRadius: '4px',
-      fontSize: '11px',
-      fontWeight: '700',
-      border: 'none',
-      cursor: 'pointer',
-      background: isActive ? '#2563eb' : 'transparent',
-      color: isActive ? '#ffffff' : '#64748b',
-      transition: 'all 0.15s ease'
-    }),
-    exportBtn: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '8px 16px',
-      background: '#16a34a',
-      color: '#ffffff',
-      borderRadius: '6px',
-      fontSize: '12px',
-      fontWeight: '700',
-      border: 'none',
-      cursor: 'pointer',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-      transition: 'background 0.15s ease'
-    },
-    dateBadge: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px',
-      fontSize: '11px',
-      fontWeight: '600',
-      color: '#475569',
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      padding: '4px 10px',
-      borderRadius: '4px',
-      marginBottom: '16px'
-    },
-    summaryBox: {
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '6px',
-      padding: '16px',
-      marginBottom: '24px'
-    },
-    metricsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(5, 1fr)',
-      gap: '12px',
-      marginBottom: '24px'
-    },
-    metricCard: {
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '4px',
-      padding: '12px 14px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px'
-    },
-    metricLabel: {
-      fontSize: '10px',
-      fontWeight: '700',
-      color: '#64748b',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px'
-    },
-    metricValue: (color) => ({
-      fontSize: '18px',
-      fontWeight: '800',
-      color: color || '#0f172a'
-    }),
-    chartsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: '16px',
-      marginBottom: '24px'
-    },
-    chartCard: {
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '6px',
-      padding: '16px'
-    },
-    chartTitle: {
-      fontSize: '12px',
-      fontWeight: '700',
-      color: '#334155',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-      marginBottom: '16px'
-    },
-    sectionHeader: {
-      fontSize: '13px',
-      fontWeight: '700',
-      color: '#334155',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-      marginBottom: '12px'
-    },
-    tableCard: {
-      background: '#ffffff',
-      border: '1px solid #e2e8f0',
-      borderRadius: '6px',
-      overflow: 'hidden',
-      marginBottom: '24px'
-    },
-    table: {
-      width: '100%',
-      borderCollapse: 'collapse',
-      fontSize: '11px',
-      textAlign: 'left'
-    },
-    th: {
-      background: '#f8fafc',
-      color: '#475569',
-      fontWeight: '700',
-      padding: '10px 14px',
-      borderBottom: '1px solid #e2e8f0',
-      textTransform: 'uppercase',
-      fontSize: '10px',
-      letterSpacing: '0.5px'
-    },
-    td: {
-      padding: '10px 14px',
-      borderBottom: '1px solid #f1f5f9',
-      color: '#334155'
-    }
+  // Shared Tailwind class strings for table cells
+  const thCls = "bg-slate-50 text-slate-600 font-bold py-2.5 px-3.5 border-b border-slate-200 uppercase text-[10px] tracking-wide text-left";
+  const tdCls = "py-2.5 px-3.5 border-b border-slate-100 text-slate-700 text-[11px]";
+  const tdBoldCls = `${tdCls} font-bold`;
+
+  // Status badge helper for table cells (replaces inline style badge)
+  const StatusPill = ({ status }) => {
+    const isHealthy = status === 'HEALTHY';
+    const isLow = status === 'LOW STOCK';
+    const bg = isHealthy ? 'bg-green-50 text-green-700' : isLow ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600';
+    return (
+      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${bg}`}>
+        {status}
+      </span>
+    );
+  };
+
+  const RecStatusPill = ({ status }) => {
+    const bg = status === 'ACCEPTED' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-600';
+    return (
+      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${bg}`}>
+        {status}
+      </span>
+    );
+  };
+
+  const VehStatusPill = ({ status }) => {
+    const bg = status === 'CRITICAL' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700';
+    return (
+      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${bg}`}>
+        {status}
+      </span>
+    );
   };
 
   return (
-    <div style={styles.container}>
+    <div className="font-sans text-slate-800 bg-slate-50 min-h-full pb-10">
       {/* Top Header & Period Selector */}
-      <div style={styles.topHeader}>
+      <div className="flex flex-row items-center justify-between gap-4 mb-5 flex-wrap">
         <div>
-          <h1 style={styles.title}>Reports & Comprehensive Analytics</h1>
-          <p style={styles.subtitle}>Full warehouse operational reports, valuation, activity trends, and exports.</p>
+          <h1 className="text-[22px] font-bold text-slate-900 m-0">Reports &amp; Comprehensive Analytics</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Full warehouse operational reports, valuation, activity trends, and exports.</p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="flex items-center gap-3">
           {/* Period Selector Controls */}
-          <div style={styles.periodSelectorGroup}>
-            <button
-              onClick={() => setPeriod('daily')}
-              style={styles.periodBtn(period === 'daily')}
-            >
-              Daily
-            </button>
-            <button
-              onClick={() => setPeriod('weekly')}
-              style={styles.periodBtn(period === 'weekly')}
-            >
-              Weekly
-            </button>
-            <button
-              onClick={() => setPeriod('monthly')}
-              style={styles.periodBtn(period === 'monthly')}
-            >
-              Monthly
-            </button>
+          <div className="inline-flex bg-white border border-slate-300 rounded-md p-0.5 gap-0.5">
+            {['daily', 'weekly', 'monthly'].map(p => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-3.5 py-1.5 rounded text-[11px] font-bold border-none cursor-pointer transition-all capitalize ${
+                  period === p
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-transparent text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            ))}
           </div>
 
           {/* Complete Multi-Sheet Excel Export Button */}
           <button
             onClick={handleExportCompleteExcel}
-            style={styles.exportBtn}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-bold border-none cursor-pointer transition-colors shadow-sm"
           >
-            <Download style={{ width: 14, height: 14 }} />
+            <Download className="w-3.5 h-3.5" />
             <span>Export Complete Excel Report</span>
           </button>
         </div>
       </div>
 
       {/* Date Range Badge */}
-      <div style={styles.dateBadge}>
-        <Calendar style={{ width: 13, height: 13, color: '#2563eb' }} />
+      <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded mb-4">
+        <Calendar className="w-3 h-3 text-blue-600" />
         <span>{periodLabel} — Range: {dateRangeText}</span>
       </div>
 
       {/* AI Executive Operational Summary Box */}
-      <div style={styles.summaryBox}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
-          <Sparkles style={{ width: 14, height: 14 }} />
+      <div className="bg-white border border-slate-200 rounded p-4 mb-6">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 uppercase tracking-wide mb-2">
+          <Sparkles className="w-3.5 h-3.5" />
           <span>Executive Operational Summary ({period.toUpperCase()})</span>
         </div>
-        <p style={{ fontSize: '12px', color: '#334155', lineHeight: '1.6', margin: 0 }}>
+        <p className="text-xs text-slate-700 leading-relaxed m-0">
           {generateExecutiveSummary()}
         </p>
       </div>
 
       {/* Summary Metrics Grid */}
-      <div style={styles.metricsGrid}>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Total Tracked SKUs</span>
-          <span style={styles.metricValue('#0f172a')}>{totalProducts}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Total Inventory Valuation</span>
-          <span style={styles.metricValue('#2563eb')}>{formatINR(totalInventoryValue)}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Low / Critical Stock</span>
-          <span style={styles.metricValue(lowStockItems.length > 0 ? '#dc2626' : '#0f172a')}>{lowStockItems.length}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Inbound Receivings</span>
-          <span style={styles.metricValue('#0f172a')}>{totalReceivings}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Stock Dispatches</span>
-          <span style={styles.metricValue('#0f172a')}>{totalStockOuts}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Active Fleet Vehicles</span>
-          <span style={styles.metricValue('#0f172a')}>{activeVehicles} / {totalVehicles}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Workers Present</span>
-          <span style={styles.metricValue('#0f172a')}>{workersPresent} / {totalWorkers}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Energy Consumed</span>
-          <span style={styles.metricValue('#0f172a')}>{energyConsumedKwh.toLocaleString()} kWh</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Projected Utility Cost</span>
-          <span style={styles.metricValue('#16a34a')}>{formatINR(projectedUtilityCost)}</span>
-        </div>
-        <div style={styles.metricCard}>
-          <span style={styles.metricLabel}>Tariff Assumption</span>
-          <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', marginTop: '4px' }}>₹{ELECTRICITY_RATE_PER_KWH.toFixed(2)} / kWh</span>
-        </div>
+      <div className="grid grid-cols-5 gap-3 mb-6">
+        {[
+          { label: 'Total Tracked SKUs',       value: totalProducts,                            color: 'text-slate-900' },
+          { label: 'Total Inventory Valuation', value: formatINR(totalInventoryValue),           color: 'text-blue-600' },
+          { label: 'Low / Critical Stock',      value: lowStockItems.length,                     color: lowStockItems.length > 0 ? 'text-red-600' : 'text-slate-900' },
+          { label: 'Inbound Receivings',        value: totalReceivings,                          color: 'text-slate-900' },
+          { label: 'Stock Dispatches',          value: totalStockOuts,                           color: 'text-slate-900' },
+          { label: 'Active Fleet Vehicles',     value: `${activeVehicles} / ${totalVehicles}`,  color: 'text-slate-900' },
+          { label: 'Workers Present',           value: `${workersPresent} / ${totalWorkers}`,   color: 'text-slate-900' },
+          { label: 'Energy Consumed',           value: `${energyConsumedKwh.toLocaleString()} kWh`, color: 'text-slate-900' },
+          { label: 'Projected Utility Cost',    value: formatINR(projectedUtilityCost),          color: 'text-green-600' },
+          { label: 'Tariff Assumption',         value: `₹${ELECTRICITY_RATE_PER_KWH.toFixed(2)} / kWh`, color: 'text-slate-500' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="bg-white border border-slate-200 rounded px-3.5 py-3 flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">{label}</span>
+            <span className={`text-[18px] font-black ${color}`}>{value}</span>
+          </div>
+        ))}
       </div>
 
       {/* Bar Charts Section (Recharts Integration) */}
-      <div style={styles.chartsGrid}>
+      <div className="grid grid-cols-2 gap-4 mb-6">
         {/* Chart 1: Inventory Valuation by Category */}
-        <div style={styles.chartCard}>
-          <h2 style={styles.chartTitle}>Inventory Valuation by Category (₹)</h2>
+        <div className="bg-white border border-slate-200 rounded p-4">
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-4 m-0">
+            Inventory Valuation by Category (₹)
+          </h2>
           {categoryChartData.length > 0 ? (
             <div style={{ width: '100%', height: 260 }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -609,13 +451,15 @@ const Reports = () => {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div style={{ padding: 40, textAlign: 'center', fontSize: 12, color: '#94a3b8' }}>No category data available for this period</div>
+            <div className="py-10 text-center text-xs text-slate-400">No category data available for this period</div>
           )}
         </div>
 
         {/* Chart 2: Operations Activity Breakdown */}
-        <div style={styles.chartCard}>
-          <h2 style={styles.chartTitle}>Warehouse Operations Activity Overview</h2>
+        <div className="bg-white border border-slate-200 rounded p-4">
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-4 m-0">
+            Warehouse Operations Activity Overview
+          </h2>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={operationsChartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
@@ -629,9 +473,11 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Chart 3: Activity & Consumption Trend */}
-        <div style={{ ...styles.chartCard, gridColumn: 'span 2' }}>
-          <h2 style={styles.chartTitle}>{periodLabel} Activity & Energy Trend ({dateRangeText})</h2>
+        {/* Chart 3: Activity & Consumption Trend — spans full width */}
+        <div className="bg-white border border-slate-200 rounded p-4 col-span-2">
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-4 m-0">
+            {periodLabel} Activity &amp; Energy Trend ({dateRangeText})
+          </h2>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trendChartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
@@ -653,19 +499,19 @@ const Reports = () => {
       {/* Detailed Operations Tables */}
 
       {/* Table 1: Inventory Stock & Valuation */}
-      <h2 style={styles.sectionHeader}>1. Inventory Valuation Breakdown</h2>
-      <div style={styles.tableCard}>
-        <table style={styles.table}>
+      <h2 className="text-[13px] font-bold text-slate-700 uppercase tracking-wide mb-3">1. Inventory Valuation Breakdown</h2>
+      <div className="bg-white border border-slate-200 rounded overflow-hidden mb-6">
+        <table className="w-full text-left border-collapse text-[11px]">
           <thead>
             <tr>
-              <th style={styles.th}>SKU</th>
-              <th style={styles.th}>Product Name</th>
-              <th style={styles.th}>Category</th>
-              <th style={styles.th}>Current Stock</th>
-              <th style={styles.th}>Min Threshold</th>
-              <th style={styles.th}>Status</th>
-              <th style={styles.th}>Unit Cost</th>
-              <th style={styles.th}>Total Valuation</th>
+              <th className={thCls}>SKU</th>
+              <th className={thCls}>Product Name</th>
+              <th className={thCls}>Category</th>
+              <th className={thCls}>Current Stock</th>
+              <th className={thCls}>Min Threshold</th>
+              <th className={thCls}>Status</th>
+              <th className={thCls}>Unit Cost</th>
+              <th className={thCls}>Total Valuation</th>
             </tr>
           </thead>
           <tbody>
@@ -680,32 +526,21 @@ const Reports = () => {
                 const val = stock * cost;
                 const status = item.status || 'HEALTHY';
                 return (
-                  <tr key={idx}>
-                    <td style={{ ...styles.td, fontWeight: '700' }}>{sku}</td>
-                    <td style={styles.td}>{name}</td>
-                    <td style={styles.td}>{cat}</td>
-                    <td style={{ ...styles.td, fontWeight: '700' }}>{stock}</td>
-                    <td style={styles.td}>{min}</td>
-                    <td style={styles.td}>
-                      <span style={{
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        fontSize: '9px',
-                        fontWeight: '700',
-                        background: status === 'HEALTHY' ? '#f0fdf4' : status === 'LOW STOCK' ? '#fff7ed' : '#fef2f2',
-                        color: status === 'HEALTHY' ? '#16a34a' : status === 'LOW STOCK' ? '#ea580c' : '#dc2626'
-                      }}>
-                        {status}
-                      </span>
-                    </td>
-                    <td style={styles.td}>{formatINR(cost)}</td>
-                    <td style={{ ...styles.td, fontWeight: '700', color: '#2563eb' }}>{formatINR(val)}</td>
+                  <tr key={idx} className="hover:bg-slate-50">
+                    <td className={tdBoldCls}>{sku}</td>
+                    <td className={tdCls}>{name}</td>
+                    <td className={tdCls}>{cat}</td>
+                    <td className={tdBoldCls}>{stock}</td>
+                    <td className={tdCls}>{min}</td>
+                    <td className={tdCls}><StatusPill status={status} /></td>
+                    <td className={tdCls}>{formatINR(cost)}</td>
+                    <td className={`${tdCls} font-bold text-blue-600`}>{formatINR(val)}</td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan={8} style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>No inventory records available for this period</td>
+                <td colSpan={8} className="py-5 text-center text-slate-400">No inventory records available for this period</td>
               </tr>
             )}
           </tbody>
@@ -713,49 +548,38 @@ const Reports = () => {
       </div>
 
       {/* Table 2: Receiving Orders */}
-      <h2 style={styles.sectionHeader}>2. Inbound Receiving Pipeline Log</h2>
-      <div style={styles.tableCard}>
-        <table style={styles.table}>
+      <h2 className="text-[13px] font-bold text-slate-700 uppercase tracking-wide mb-3">2. Inbound Receiving Pipeline Log</h2>
+      <div className="bg-white border border-slate-200 rounded overflow-hidden mb-6">
+        <table className="w-full text-left border-collapse text-[11px]">
           <thead>
             <tr>
-              <th style={styles.th}>Invoice #</th>
-              <th style={styles.th}>Supplier</th>
-              <th style={styles.th}>Product</th>
-              <th style={styles.th}>Vehicle Code</th>
-              <th style={styles.th}>Expected Qty</th>
-              <th style={styles.th}>CV Verified Qty</th>
-              <th style={styles.th}>Weight Qty</th>
-              <th style={styles.th}>Verification Status</th>
+              <th className={thCls}>Invoice #</th>
+              <th className={thCls}>Supplier</th>
+              <th className={thCls}>Product</th>
+              <th className={thCls}>Vehicle Code</th>
+              <th className={thCls}>Expected Qty</th>
+              <th className={thCls}>CV Verified Qty</th>
+              <th className={thCls}>Weight Qty</th>
+              <th className={thCls}>Verification Status</th>
             </tr>
           </thead>
           <tbody>
             {receivingList.length > 0 ? (
               receivingList.map((rec, idx) => (
-                <tr key={idx}>
-                  <td style={{ ...styles.td, fontWeight: '700' }}>{rec.invoice_number}</td>
-                  <td style={styles.td}>{rec.supplier_name}</td>
-                  <td style={styles.td}>{rec.product_name}</td>
-                  <td style={styles.td}>{rec.vehicle_code}</td>
-                  <td style={styles.td}>{rec.expected_qty}</td>
-                  <td style={styles.td}>{rec.cv_detected_qty}</td>
-                  <td style={styles.td}>{rec.weight_measured_qty}</td>
-                  <td style={styles.td}>
-                    <span style={{
-                      padding: '2px 6px',
-                      borderRadius: '3px',
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      background: rec.status === 'ACCEPTED' ? '#f0fdf4' : '#fffbeb',
-                      color: rec.status === 'ACCEPTED' ? '#16a34a' : '#d97706'
-                    }}>
-                      {rec.status}
-                    </span>
-                  </td>
+                <tr key={idx} className="hover:bg-slate-50">
+                  <td className={tdBoldCls}>{rec.invoice_number}</td>
+                  <td className={tdCls}>{rec.supplier_name}</td>
+                  <td className={tdCls}>{rec.product_name}</td>
+                  <td className={tdCls}>{rec.vehicle_code}</td>
+                  <td className={tdCls}>{rec.expected_qty}</td>
+                  <td className={tdCls}>{rec.cv_detected_qty}</td>
+                  <td className={tdCls}>{rec.weight_measured_qty}</td>
+                  <td className={tdCls}><RecStatusPill status={rec.status} /></td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={8} style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>No receiving records available for this period</td>
+                <td colSpan={8} className="py-5 text-center text-slate-400">No receiving records available for this period</td>
               </tr>
             )}
           </tbody>
@@ -763,49 +587,38 @@ const Reports = () => {
       </div>
 
       {/* Table 3: Vehicle Fleet Status */}
-      <h2 style={styles.sectionHeader}>3. Vehicle Fleet Telemetry & Maintenance</h2>
-      <div style={styles.tableCard}>
-        <table style={styles.table}>
+      <h2 className="text-[13px] font-bold text-slate-700 uppercase tracking-wide mb-3">3. Vehicle Fleet Telemetry &amp; Maintenance</h2>
+      <div className="bg-white border border-slate-200 rounded overflow-hidden mb-6">
+        <table className="w-full text-left border-collapse text-[11px]">
           <thead>
             <tr>
-              <th style={styles.th}>Vehicle Code</th>
-              <th style={styles.th}>Name</th>
-              <th style={styles.th}>Type</th>
-              <th style={styles.th}>Current Zone</th>
-              <th style={styles.th}>Health Score</th>
-              <th style={styles.th}>Engine Temp</th>
-              <th style={styles.th}>Hydraulic Press</th>
-              <th style={styles.th}>Status</th>
+              <th className={thCls}>Vehicle Code</th>
+              <th className={thCls}>Name</th>
+              <th className={thCls}>Type</th>
+              <th className={thCls}>Current Zone</th>
+              <th className={thCls}>Health Score</th>
+              <th className={thCls}>Engine Temp</th>
+              <th className={thCls}>Hydraulic Press</th>
+              <th className={thCls}>Status</th>
             </tr>
           </thead>
           <tbody>
             {vehicleList.length > 0 ? (
               vehicleList.map((v, idx) => (
-                <tr key={idx}>
-                  <td style={{ ...styles.td, fontWeight: '700' }}>{v.vehicle_code}</td>
-                  <td style={styles.td}>{v.name}</td>
-                  <td style={styles.td}>{v.type}</td>
-                  <td style={styles.td}>{v.current_zone}</td>
-                  <td style={{ ...styles.td, fontWeight: '700', color: v.health_score < 50 ? '#dc2626' : '#16a34a' }}>{v.health_score}%</td>
-                  <td style={styles.td}>{v.engine_temp_c}°C</td>
-                  <td style={styles.td}>{v.hydraulic_press_psi} PSI</td>
-                  <td style={styles.td}>
-                    <span style={{
-                      padding: '2px 6px',
-                      borderRadius: '3px',
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      background: v.status === 'CRITICAL' ? '#fef2f2' : '#f0fdf4',
-                      color: v.status === 'CRITICAL' ? '#dc2626' : '#16a34a'
-                    }}>
-                      {v.status}
-                    </span>
-                  </td>
+                <tr key={idx} className="hover:bg-slate-50">
+                  <td className={tdBoldCls}>{v.vehicle_code}</td>
+                  <td className={tdCls}>{v.name}</td>
+                  <td className={tdCls}>{v.type}</td>
+                  <td className={tdCls}>{v.current_zone}</td>
+                  <td className={`${tdCls} font-bold ${v.health_score < 50 ? 'text-red-600' : 'text-green-600'}`}>{v.health_score}%</td>
+                  <td className={tdCls}>{v.engine_temp_c}°C</td>
+                  <td className={tdCls}>{v.hydraulic_press_psi} PSI</td>
+                  <td className={tdCls}><VehStatusPill status={v.status} /></td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={8} style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>No vehicle telemetry data available for this period</td>
+                <td colSpan={8} className="py-5 text-center text-slate-400">No vehicle telemetry data available for this period</td>
               </tr>
             )}
           </tbody>
@@ -814,30 +627,30 @@ const Reports = () => {
 
       {/* OWNER ONLY Financial Cost Statement */}
       {isOwner && financialData && (
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '16px', marginTop: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '12px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '700', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Owner Financial & Operating Expense Statement ({periodLabel})
+        <div className="bg-white border border-slate-200 rounded p-4 mt-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">
+              Owner Financial &amp; Operating Expense Statement ({periodLabel})
             </span>
-            <span style={{ background: '#fef3c7', color: '#d97706', fontSize: '9px', fontWeight: '700', padding: '2px 6px', borderRadius: '2px' }}>
+            <span className="bg-amber-100 text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
               OWNER RESTRICTED
             </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Total Inventory Asset Valuation</span>
-              <div style={{ fontSize: '18px', fontWeight: '800', color: '#2563eb', margin: '4px 0 2px 0' }}>{formatINR(totalInventoryValue)}</div>
-              <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>Physical inventory asset total</p>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Total Inventory Asset Valuation</span>
+              <div className="text-[18px] font-black text-blue-600 my-1">{formatINR(totalInventoryValue)}</div>
+              <p className="text-[10px] text-slate-400 m-0">Physical inventory asset total</p>
             </div>
             <div>
-              <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Monthly Operating Costs</span>
-              <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', margin: '4px 0 2px 0' }}>{formatINR(financialData.monthly_warehouse_operating_cost || 18450)}</div>
-              <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>Logistics & facility overhead</p>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Monthly Operating Costs</span>
+              <div className="text-[18px] font-black text-slate-900 my-1">{formatINR(financialData.monthly_warehouse_operating_cost || 18450)}</div>
+              <p className="text-[10px] text-slate-400 m-0">Logistics &amp; facility overhead</p>
             </div>
             <div>
-              <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Projected Profit Margin</span>
-              <div style={{ fontSize: '18px', fontWeight: '800', color: '#16a34a', margin: '4px 0 2px 0' }}>{financialData.projected_monthly_profit_margin || '24.8%'}</div>
-              <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>Forecasted operating efficiency</p>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Projected Profit Margin</span>
+              <div className="text-[18px] font-black text-green-600 my-1">{financialData.projected_monthly_profit_margin || '24.8%'}</div>
+              <p className="text-[10px] text-slate-400 m-0">Forecasted operating efficiency</p>
             </div>
           </div>
         </div>

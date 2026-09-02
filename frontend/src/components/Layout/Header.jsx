@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Bell, HelpCircle, User } from 'lucide-react';
+import { Search, HelpCircle, User } from 'lucide-react';
+import NotificationBell from '../Common/NotificationBell';
 
 const Header = ({ title = "Overview" }) => {
   const { user } = useAuth();
@@ -30,11 +31,8 @@ const Header = ({ title = "Overview" }) => {
           />
         </div>
 
-        {/* Notification Bell */}
-        <button className="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-colors">
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-        </button>
+        {/* Notification Bell — live out-of-stock alerts */}
+        <NotificationBell />
 
         {/* Help Icon */}
         <button className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-colors">

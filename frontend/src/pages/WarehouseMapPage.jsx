@@ -39,6 +39,7 @@ const WarehouseMapPage = () => {
     setIsFullScreen(f => !f);
   };
 
+  // Container style must remain inline — conditional fullscreen uses fixed positioning
   const containerStyle = isFullScreen
     ? { position: 'fixed', inset: 0, zIndex: 9999, background: '#1e293b', display: 'flex', flexDirection: 'column' }
     : { display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 };
@@ -88,59 +89,32 @@ const WarehouseMapPage = () => {
   return (
     <div style={containerStyle}>
       {/* Top Header Bar */}
-      <div style={{
-        background: '#1e293b',
-        color: '#fff',
-        padding: '10px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderBottom: '1px solid #334155',
-        flexShrink: 0
-      }}>
-        <h1 style={{ margin: 0, fontSize: 14, fontWeight: 700, letterSpacing: '0.3px', color: '#fff', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <div className="bg-slate-800 text-white px-5 py-2.5 flex items-center justify-between border-b border-slate-700 flex-shrink-0">
+        <h1 className="m-0 text-sm font-bold tracking-tight text-white" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
           Real-time Floor map
         </h1>
-        <div style={{ position: 'relative' }}>
+        <div className="relative">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '5px 12px',
-              background: '#334155',
-              border: '1px solid #475569',
-              borderRadius: 4,
-              color: '#e2e8f0',
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: 'pointer'
-            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 border border-slate-600 rounded text-slate-200 text-xs font-medium cursor-pointer hover:bg-slate-600 transition-colors"
           >
             <span>Actives...</span>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           {showDropdown && (
-            <div style={{
-              position: 'absolute', top: '100%', right: 0, marginTop: 4,
-              background: '#1e293b', border: '1px solid #475569', borderRadius: 6,
-              padding: 8, minWidth: 160, zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
-            }}>
+            <div className="absolute top-full right-0 mt-1 bg-slate-800 border border-slate-600 rounded-md p-2 min-w-[160px] z-[100]"
+              style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
               {vehicles.map(v => (
-                <div key={v.id} style={{
-                  padding: '6px 10px', fontSize: 11, color: '#cbd5e1', cursor: 'pointer',
-                  borderRadius: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                <div
+                  key={v.id}
+                  className="px-2.5 py-1.5 text-[11px] text-slate-300 cursor-pointer rounded flex justify-between items-center hover:bg-slate-700 transition-colors"
                   onClick={() => { setSelectedVehicle(v); setShowDropdown(false); }}
                 >
-                  <span style={{ fontWeight: 600 }}>{v.code}</span>
-                  <span style={{
-                    display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
-                    background: v.status === 'Active' ? '#4ade80' : '#fbbf24'
-                  }} />
+                  <span className="font-semibold">{v.code}</span>
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ background: v.status === 'Active' ? '#4ade80' : '#fbbf24' }}
+                  />
                 </div>
               ))}
             </div>
@@ -151,31 +125,22 @@ const WarehouseMapPage = () => {
       {/* Map Area */}
       <div
         ref={mapContainerRef}
-        style={{
-          flex: 1,
-          background: '#cbd5e1',
-          overflow: 'auto',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          padding: 12,
-          position: 'relative',
-          minHeight: 0
-        }}
+        className="flex-1 bg-slate-300 overflow-auto flex justify-center items-start p-3 relative"
+        style={{ minHeight: 0 }}
       >
-        <div style={{
-          width: 1060,
-          height: 780,
-          background: '#e8ecf1',
-          border: '3px solid #475569',
-          borderRadius: 2,
-          position: 'relative',
-          transform: `scale(${zoomLevel / 100})`,
-          transformOrigin: 'top center',
-          boxShadow: '0 4px 30px rgba(0,0,0,0.15)',
-          userSelect: 'none',
-          flexShrink: 0
-        }}
+        <div
+          className="relative flex-shrink-0"
+          style={{
+            width: 1060,
+            height: 780,
+            background: '#e8ecf1',
+            border: '3px solid #475569',
+            borderRadius: 2,
+            transform: `scale(${zoomLevel / 100})`,
+            transformOrigin: 'top center',
+            boxShadow: '0 4px 30px rgba(0,0,0,0.15)',
+            userSelect: 'none',
+          }}
           onClick={() => setSelectedVehicle(null)}
         >
           {/* SVG Warehouse Layout */}
@@ -370,34 +335,27 @@ const WarehouseMapPage = () => {
             <div
               key={v.id}
               onClick={e => { e.stopPropagation(); setSelectedVehicle(v); }}
+              className="absolute cursor-pointer z-30"
               style={{
-                position: 'absolute',
                 left: v.x,
                 top: v.y,
                 transition: 'left 4s ease-in-out, top 4s ease-in-out',
-                cursor: 'pointer',
-                zIndex: 30
               }}
             >
               {/* Label */}
-              <div style={{
-                fontSize: 10, fontWeight: 700, color: '#1e293b',
-                background: 'rgba(255,255,255,0.85)', padding: '1px 5px',
-                borderRadius: 3, textAlign: 'center', marginBottom: 2,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.15)', whiteSpace: 'nowrap'
-              }}>
+              <div className="text-[10px] font-bold text-slate-800 text-center mb-0.5 whitespace-nowrap rounded"
+                style={{
+                  background: 'rgba(255,255,255,0.85)',
+                  padding: '1px 5px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+                }}
+              >
                 {v.code}
               </div>
               {/* Forklift icon */}
-              <div style={{
-                width: 28, height: 28, background: '#2563eb',
-                border: '2px solid #fff', borderRadius: 6,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(37,99,235,0.45)',
-                transition: 'transform 0.15s ease'
-              }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              <div
+                className="w-7 h-7 bg-blue-600 border-2 border-white rounded-md flex items-center justify-center hover:scale-110 transition-transform"
+                style={{ boxShadow: '0 2px 8px rgba(37,99,235,0.45)' }}
               >
                 {/* Forklift SVG icon */}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -410,10 +368,7 @@ const WarehouseMapPage = () => {
                 </svg>
               </div>
               {/* Speed trail */}
-              <div style={{
-                position: 'absolute', left: -12, top: 20,
-                display: 'flex', gap: 2, opacity: 0.6
-              }}>
+              <div className="absolute flex gap-0.5 opacity-60" style={{ left: -12, top: 20 }}>
                 <span style={{ width: 4, height: 2, background: '#60a5fa', borderRadius: 2 }} />
                 <span style={{ width: 7, height: 2, background: '#93c5fd', borderRadius: 2 }} />
               </div>
@@ -424,49 +379,36 @@ const WarehouseMapPage = () => {
           {selectedVehicle && (
             <div
               onClick={e => e.stopPropagation()}
+              className="absolute text-white rounded-lg z-50 text-[11px]"
               style={{
-                position: 'absolute',
                 left: selectedVehicle.x + 40,
                 top: selectedVehicle.y - 20,
                 background: '#1e293b',
-                color: '#fff',
-                borderRadius: 8,
                 padding: '12px 14px',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
                 border: '1px solid #475569',
-                fontSize: 11,
                 width: 175,
-                zIndex: 50,
                 fontFamily: 'Inter, system-ui, sans-serif'
               }}
             >
-              <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                borderBottom: '1px solid #475569', paddingBottom: 6, marginBottom: 8
-              }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{selectedVehicle.code}</span>
+              <div className="flex justify-between items-center border-b border-slate-600 pb-1.5 mb-2">
+                <span className="font-bold text-sm text-white">{selectedVehicle.code}</span>
                 <button
                   onClick={() => setSelectedVehicle(null)}
-                  style={{
-                    background: 'none', border: 'none', color: '#94a3b8',
-                    cursor: 'pointer', fontSize: 14, fontWeight: 700, padding: '0 2px',
-                    lineHeight: 1
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-                  onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+                  className="bg-transparent border-none text-slate-400 hover:text-white cursor-pointer text-sm font-bold p-0 leading-none transition-colors"
                 >
                   ✕
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <div style={{ color: '#cbd5e1' }}>
+              <div className="flex flex-col gap-1">
+                <div className="text-slate-300">
                   Status: <span style={{ color: selectedVehicle.status === 'Active' ? '#4ade80' : '#fbbf24', fontWeight: 600 }}>{selectedVehicle.status}</span>
                 </div>
-                <div style={{ color: '#cbd5e1' }}>
-                  Operator: <span style={{ color: '#fff', fontWeight: 500 }}>{selectedVehicle.operator}</span>
+                <div className="text-slate-300">
+                  Operator: <span className="text-white font-medium">{selectedVehicle.operator}</span>
                 </div>
-                <div style={{ color: '#cbd5e1' }}>
-                  Speed: <span style={{ color: '#fff', fontWeight: 500 }}>{selectedVehicle.speed}</span>
+                <div className="text-slate-300">
+                  Speed: <span className="text-white font-medium">{selectedVehicle.speed}</span>
                 </div>
               </div>
               {/* Tooltip arrow */}
@@ -481,54 +423,31 @@ const WarehouseMapPage = () => {
           )}
 
           {/* ===== ZOOM CONTROLS ===== */}
-          <div style={{
-            position: 'absolute', bottom: 12, right: 12,
-            background: '#1e293b', borderRadius: 6,
-            padding: '4px 6px',
-            display: 'flex', alignItems: 'center', gap: 4,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
-            border: '1px solid #475569',
-            zIndex: 50
-          }}>
+          <div
+            className="absolute bottom-3 right-3 bg-slate-800 rounded flex items-center gap-1 border border-slate-600 z-50"
+            style={{ padding: '4px 6px', boxShadow: '0 4px 16px rgba(0,0,0,0.35)' }}
+          >
             <button
               onClick={handleZoomOut}
-              style={{
-                background: 'none', border: 'none', color: '#cbd5e1',
-                cursor: 'pointer', padding: '4px 6px', borderRadius: 4, fontSize: 12,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              className="bg-transparent border-none text-slate-300 cursor-pointer p-1 rounded flex items-center justify-center hover:bg-slate-700 transition-colors"
               title="Zoom Out"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
             </button>
-            <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 11, color: '#e2e8f0', padding: '0 4px', minWidth: 36, textAlign: 'center' }}>
+            <span className="font-mono font-bold text-[11px] text-slate-200 px-1 min-w-[36px] text-center">
               {zoomLevel}%
             </span>
             <button
               onClick={handleZoomIn}
-              style={{
-                background: 'none', border: 'none', color: '#cbd5e1',
-                cursor: 'pointer', padding: '4px 6px', borderRadius: 4, fontSize: 12,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              className="bg-transparent border-none text-slate-300 cursor-pointer p-1 rounded flex items-center justify-center hover:bg-slate-700 transition-colors"
               title="Zoom In"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
             </button>
-            <div style={{ width: 1, height: 14, background: '#475569' }} />
+            <div className="w-px h-3.5 bg-slate-600" />
             <button
               onClick={handleFullscreen}
-              style={{
-                background: 'none', border: 'none', color: '#cbd5e1',
-                cursor: 'pointer', padding: '4px 6px', borderRadius: 4, fontSize: 12,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#334155'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              className="bg-transparent border-none text-slate-300 cursor-pointer p-1 rounded flex items-center justify-center hover:bg-slate-700 transition-colors"
               title="Toggle Fullscreen"
             >
               {isFullScreen ? (
